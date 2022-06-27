@@ -711,7 +711,7 @@ mod matrix_tranformations {
     }
 
     #[test]
-    fn roatation_x() {
+    fn rotation_x() {
         let p1 = primatives::point(0.0, 1.0, 0.0);
 
         let pi = transformations::PI;
@@ -721,9 +721,49 @@ mod matrix_tranformations {
         let root_2_over_2 = (2.0_f64).sqrt() / 2.0;
         let expected = primatives::point(0.0, root_2_over_2, root_2_over_2);
         let expected2 = primatives::point(0.0, 0.0, 1.0);
+        assert_eq!(expected, half_quarter * p1);
+        assert_eq!(expected2, full_quarter * p1);
+
+        assert_eq!(p1, half_quarter.inverse() * expected);
+        assert_eq!(p1, full_quarter.inverse() * expected2);
+
+    }
+
+    #[test]
+    fn rotation_y() {
+        let p1 = primatives::point(0.0, 0.0, 1.0);
+
+        let pi = transformations::PI;
+        let half_quarter = transformations::new_rotation_y(pi / 4.0);
+        let full_quarter = transformations::new_rotation_y(pi / 2.0);
+
+        let root_2_over_2 = (2.0_f64).sqrt() / 2.0;
+        let expected = primatives::point(root_2_over_2, 0.0, root_2_over_2);
+        let expected2 = primatives::point(1.0, 0.0, 0.0);
 
         assert_eq!(expected, half_quarter * p1);
         assert_eq!(expected2, full_quarter * p1);
 
+        assert_eq!(p1, half_quarter.inverse() * expected);
+        assert_eq!(p1, full_quarter.inverse() * expected2);
+    }
+
+    #[test]
+    fn rotation_z() {
+        let p1 = primatives::point(0.0, 1.0, 0.0);
+
+        let pi = transformations::PI;
+        let half_quarter = transformations::new_rotation_z(pi / 4.0);
+        let full_quarter = transformations::new_rotation_z(pi / 2.0);
+
+        let root_2_over_2 = (2.0_f64).sqrt() / 2.0;
+        let expected = primatives::point(-root_2_over_2, root_2_over_2, 0.0);
+        let expected2 = primatives::point(-1.0, 0.0, 0.0);
+
+        assert_eq!(expected, half_quarter * p1);
+        assert_eq!(expected2, full_quarter * p1);
+
+        assert_eq!(p1, half_quarter.inverse() * expected);
+        assert_eq!(p1, full_quarter.inverse() * expected2);
     }
 }

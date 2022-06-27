@@ -34,3 +34,25 @@ pub fn new_rotation_x(deg_radians: f64) -> matrix::Matrix4x4 {
         ]
     }
 }
+
+pub fn new_rotation_y(deg_radians: f64) -> matrix::Matrix4x4 {
+    return matrix::Matrix4x4 {
+        contents: [
+            [deg_radians.cos(), 0.0, deg_radians.sin(), 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [-deg_radians.sin(), 0.0, deg_radians.cos(), 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+        ]
+    }
+}
+
+pub fn new_rotation_z(deg_radians: f64) -> matrix::Matrix4x4 {
+    return matrix::Matrix4x4 {
+        contents: [
+            [deg_radians.cos(), -deg_radians.sin(), 0.0, 0.0],
+            [deg_radians.sin(), deg_radians.cos(), 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+        ]
+    }
+}
