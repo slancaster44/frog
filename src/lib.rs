@@ -3,6 +3,7 @@ pub mod primatives;
 pub mod matrix;
 pub mod color;
 pub mod canvas;
+pub mod ray;
 
 #[cfg(test)]
 mod primatives_tests {
@@ -819,5 +820,53 @@ mod matrix_tranformations {
         }
 
         can.write_to_ppm("clockface.ppm");
+    }
+}
+
+#[cfg(test)]
+mod ray_tests {
+    use crate::ray;
+    use crate::primatives;
+
+    #[test]
+    fn ray_creation() {
+        let p1 = primatives::point(0.0, 0.0, 0.0);
+        let v1 = primatives::vec3(1.0, 1.0, 1.0);
+        let r = ray::new(p1, v1);
+        assert_eq!(r.direction, v1);
+        assert_eq!(r.origin, p1);
+    }
+
+    #[test]
+    #[should_panic]
+    fn origin_panic() {
+        let v1 = primatives::vec3(1.0, 1.0, 1.0);
+        ray::new(v1, v1);
+    }
+
+    #[test]
+    #[should_panic]
+    fn direction_panic() {
+        let p1 = primatives::point(1.0, 1.0, 1.0);
+        ray::new(p1, p1);
+    }
+
+    #[test]
+    fn ray_cast() {
+        let start = primatives::point(2.0, 3.0, 4.0);
+        let dir = primatives::vec3(1.0, 0.0, 0.0);
+        let r = ray::new(start, dir);
+
+        let expected = primatives::point(2.0, 3.0, 4.0);
+        assert_eq!(expected, r.position(0.0));
+
+        let expected = primatives::point(3.0, 3.0, 4.0);
+        assert_eq!(expected, r.position(1.0));
+
+        let expected = primatives::point(1.0, 3.0, 4.0);
+        assert_eq!(expected, r.position(-1.0));
+
+        let expected = primatives::point(4.5, 3.0, 4.0);
+        assert_eq!(expected, r.position(2.5));
     }
 }
