@@ -245,11 +245,12 @@ mod primatives_tests {
         };
 
         let mut this_canvas = canvas::new(900, 550);
+        this_canvas.origin = (0, 0);
         let this_color = color::new(0.0, 1.0, 0.0);
 
         this_proj = tick(this_env, this_proj);
         while this_proj.location.y > 0.0 {
-            this_canvas.plot(this_proj.location.x as usize, this_proj.location.y as usize, this_color);
+            this_canvas.plot(this_proj.location.x as i32, this_proj.location.y as i32, this_color);
             this_proj = tick(this_env, this_proj);
         }
 
@@ -353,21 +354,21 @@ mod canvas_tests {
     #[test]
     fn test_canvas_plot_and_read() {
         let mut canvas = canvas::new(100, 100);
-        let c1 = color::new(1.0, 0.0, 0.0);
 
-        for x in 0..100 {
-            for y in 0..100 {
-                canvas.plot(x, y, c1);
-            }
-        }
+        let red = color::new(1.0, 0.0, 0.0);
+        let green = color::new(0.0, 1.0, 0.0);
+        let blue = color::new(0.0, 0.0, 1.0);
+        let white = color::new(1.0, 1.0, 1.0);
 
-        let c2 = color::new(0.0, 1.0, 0.0);
-        canvas.plot(0, 0, c2);
-        let c3 = canvas.read(0, 0);
-        assert_eq!(c2, c3);
+        canvas.plot(-1, -1, green);
+        let read_out = canvas.read(-1, -1);
+        assert_eq!(green, read_out);
 
-        let c4 = canvas.read(1, 1);
-        assert_eq!(c4, c1);
+        canvas.plot(1, 1, red);
+        canvas.plot(1, -1, blue);
+        canvas.plot(-1, 1, white);
+
+        //canvas.write_to_ppm("coord_plane_test.ppm");
     }
 
     #[test]
@@ -375,7 +376,7 @@ mod canvas_tests {
     fn test_plot_out_of_bounds() {
         let mut canvas = canvas::new(100, 100);
         let c1 = color::new(1.0, 0.0, 0.0);
-        canvas.plot(100, 100, c1);
+        canvas.plot(50, 50, c1);
     }
 }
 
@@ -668,6 +669,8 @@ mod matrix_tests {
 mod matrix_tranformations {
     use crate::matrix::transformations;
     use crate::primatives;
+    use crate::canvas;
+    use crate::color;
 
     #[test]
     fn translation() {
@@ -765,5 +768,56 @@ mod matrix_tranformations {
 
         assert_eq!(p1, half_quarter.inverse() * expected);
         assert_eq!(p1, full_quarter.inverse() * expected2);
+    }
+
+    #[test]
+    fn shearing() {
+        let p1 = primatives::point(2.0, 3.0, 4.0);
+
+        let transform = transformations::new_shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let expected = primatives::point(5.0, 3.0, 4.0);
+        assert_eq!(transform * p1, expected);
+
+        let transform = transformations::new_shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+        let expected = primatives::point(6.0, 3.0, 4.0);
+        assert_eq!(transform * p1, expected);
+
+        let transform = transformations::new_shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+        let expected = primatives::point(2.0, 5.0, 4.0);
+        assert_eq!(transform * p1, expected);
+
+        let transform = transformations::new_shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        let expected = primatives::point(2.0, 7.0, 4.0);
+        assert_eq!(transform * p1, expected);
+
+        let transform = transformations::new_shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        let expected = primatives::point(2.0, 3.0, 6.0);
+        assert_eq!(transform * p1, expected);
+
+        let transform = transformations::new_shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        let expected = primatives::point(2.0, 3.0, 7.0);
+        assert_eq!(transform * p1, expected);
+        assert_eq!(transform.inverse() * expected, p1);
+    }
+
+    #[ignore]
+    #[test]
+    fn clock_face() {
+        let mut can = canvas::new(550, 550);
+        let p1 = primatives::point(100.0, 100.0, 0.0);
+
+        let pi = transformations::PI;
+        let clock_rotation = transformations::new_rotation_z((2.0 * pi) / 12.0);
+
+        let c1 = color::new(1.0, 0.0, 0.0);
+        can.plot(p1.x as i32, p1.y as i32, c1);
+         
+        let mut p2 = clock_rotation * p1;
+        while p2 != p1 {
+            can.plot(p2.x as i32, p2.y as i32, c1);
+            p2 = clock_rotation * p2;
+        }
+
+        can.write_to_ppm("clockface.ppm");
     }
 }

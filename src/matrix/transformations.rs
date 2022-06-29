@@ -56,3 +56,14 @@ pub fn new_rotation_z(deg_radians: f64) -> matrix::Matrix4x4 {
         ]
     }
 }
+
+pub fn new_shearing(xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> matrix::Matrix4x4 {
+    return matrix::Matrix4x4 {
+        contents: [
+            [1.0, xy, xz, 0.0],
+            [yx, 1.0, yz, 0.0],
+            [zx, zy, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+        ]
+    }
+}

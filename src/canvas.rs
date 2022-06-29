@@ -4,6 +4,7 @@ use std::io::Write;
 
 #[derive(Debug, Clone)]
 pub struct Canvas {
+    pub origin: (i32, i32),
     pub width: usize,
     pub height: usize,
     pub contents: Vec<color::Color>,
@@ -11,6 +12,7 @@ pub struct Canvas {
 
 pub fn new(w: usize, h: usize) -> Canvas {
     return Canvas {
+        origin: (w as i32 / 2 as i32, h as i32 / 2 as i32),
         width: w,
         height: h,
         contents: vec![color::new(0.0, 0.0, 0.0); w * h],
@@ -18,23 +20,29 @@ pub fn new(w: usize, h: usize) -> Canvas {
 }
 
 impl Canvas {
-    pub fn plot(&mut self, x: usize, y: usize, c1: color::Color) {
-        self.check_location(x, y);
-        let location = (y * self.width) + x;
+    pub fn plot(&mut self, x: i32, y: i32, c1: color::Color) {
+        let location = self.convert_location(x, y);
         self.contents[location] = c1;
     }
 
-    pub fn read(&self, x: usize, y: usize) -> color::Color {
-        self.check_location(x, y);
-        let location = (y * self.width) + x;
+    fn convert_location(&self, x_arg: i32, y_arg: i32) -> usize {
+        let x = x_arg + self.origin.0;
+        let y = y_arg + self.origin.1;
+
+        if x < 0 || y < 0 {
+            panic!("Coordinate out of bounds ({}, {})", x_arg, y_arg);
+        } else if x as usize > self.width || y as usize > self.height {
+            panic!("Coordinate out of bounds ({}, {})", x_arg, y_arg);
+        }
+
+        return ((y as usize) * self.width) + (x as usize);
+    }
+
+    pub fn read(&self, x: i32, y: i32) -> color::Color {
+        let location = self.convert_location(x, y);
         return self.contents[location];
     }
 
-    pub fn check_location(&self, x: usize, y: usize) {
-        if x > self.width || y > self.height {
-            panic!("Invalid plot location: {} {}", x, y);
-        }
-    }
 
     pub fn write_to_ppm(&self, filename: &str) {
         let mut file = fs::File::create(filename).expect("PPM file creation failed");
