@@ -4,6 +4,7 @@ pub mod matrix;
 pub mod color;
 pub mod canvas;
 pub mod ray;
+pub mod shapes;
 
 #[cfg(test)]
 mod primatives_tests {
@@ -169,7 +170,7 @@ mod primatives_tests {
         let vec1 = primatives::vec3(1.0, 3.0, -5.0);
         let vec2 = primatives::vec3(4.0, -2.0, -1.0);
 
-        let result = primatives::dot_product(&vec1, &vec2);
+        let result = primatives::dot_product(vec1, vec2);
         assert_eq!(result, 3.0);
     }
 
@@ -178,11 +179,11 @@ mod primatives_tests {
         let vec1 = primatives::vec3(1.0, 2.0, 3.0);
         let vec2 = primatives::vec3(2.0, 3.0, 4.0);
 
-        let result_1_2 = primatives::cross_product(&vec1, &vec2);
+        let result_1_2 = primatives::cross_product(vec1, vec2);
         let expected_1_2 = primatives::vec3(-1.0, 2.0, -1.0);
         assert_eq!(result_1_2, expected_1_2);
 
-        let result_2_1 = primatives::cross_product(&vec2, &vec1);
+        let result_2_1 = primatives::cross_product(vec2, vec1);
         let expected_2_1 = primatives::vec3(1.0, -2.0, 1.0);
         assert_eq!(result_2_1, expected_2_1);
     }
@@ -868,5 +869,66 @@ mod ray_tests {
 
         let expected = primatives::point(4.5, 3.0, 4.0);
         assert_eq!(expected, r.position(2.5));
+
+        let start = primatives::point(0.0, 0.0, -5.0);
+        let dir = primatives::vec3(0.0, 0.0, 1.0);
+
+        let expected = primatives::point(0.0, 0.0, -1.0);
+        let r = ray::new(start, dir);
+        assert_eq!(expected, r.position(4.0));
+    }
+}
+
+#[cfg(test)]
+mod shape_test {
+    use crate::primatives;
+    use crate::shapes;
+    use crate::shapes::Shape;
+    use crate::ray;
+
+    #[test]
+    #[should_panic]
+    fn sphere_creation() {
+        let p1 = primatives::point(0.0, 0.0, 0.0);
+        let radius = 2.0;
+
+        let c1 = shapes::new_sphere(radius, p1);
+        assert_eq!(p1, c1.origin);
+        assert_eq!(radius, c1.radius);
+
+        let v1 = primatives::vec3(0.0, 0.0, 1.0);
+        shapes::new_sphere(radius, v1);
+    }
+
+    #[test]
+    fn ray_sphere_intersection() {
+        let s1 = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 0.0));
+
+        let r1 = ray::new(primatives::point(0.0, 0.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
+        let intersections = s1.intersect(r1);
+        
+        assert_eq!(intersections.len(), 2);
+        assert_eq!(intersections[0], r1.position(6.0));
+        assert_eq!(intersections[1], r1.position(4.0));
+
+        let s2 = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 0.0));
+        let r2 = ray::new(primatives::point(0.0, 1.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
+        let intersections = s2.intersect(r2);
+
+        assert_eq!(intersections.len(), 1);
+        assert_eq!(intersections[0], r2.position(5.0));
+
+        let s3 = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 1.0));
+        let r3 = ray::new(primatives::point(0.0, 2.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
+        let intersections = s3.intersect(r3);
+
+        assert_eq!(intersections.len(), 0);
+
+        //Ensures that intersections behind ray origin are detected
+        let s4 = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 0.0));
+        let r4 = ray::new(primatives::point(0.0, 0.0, 0.0,), primatives::vec3(0.0, 0.0, 1.0));
+        let intersections = s4.intersect(r4);
+
+        assert_eq!(intersections.len(), 2);
     }
 }

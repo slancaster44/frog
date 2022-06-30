@@ -1,5 +1,6 @@
 use crate::primatives;
 
+#[derive(Debug, Clone, Copy)]
 pub struct Ray {
     pub origin: primatives::Tuple,
     pub direction: primatives::Tuple
