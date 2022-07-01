@@ -1,4 +1,5 @@
 use crate::primatives;
+use crate::matrix;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
@@ -22,4 +23,12 @@ impl Ray {
         //that to the origin point to get the ray's current location
         return self.origin + (self.direction * time);
     }
+
+    pub fn transform(&self, m: matrix::Matrix4x4) -> Ray{
+        Ray {
+            origin: m * self.origin,
+            direction: m * self.direction
+        }
+    }
 }
+

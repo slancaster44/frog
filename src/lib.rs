@@ -828,6 +828,7 @@ mod matrix_tranformations {
 mod ray_tests {
     use crate::ray;
     use crate::primatives;
+    use crate::matrix::transformations;
 
     #[test]
     fn ray_creation() {
@@ -877,6 +878,29 @@ mod ray_tests {
         let r = ray::new(start, dir);
         assert_eq!(expected, r.position(4.0));
     }
+
+    #[test]
+    fn ray_transformations() {
+        let r1 = ray::new(primatives::point(1.0, 2.0, 3.0), primatives::vec3(0.0, 1.0, 0.0));
+        let m = transformations::new_translation(3.0, 4.0, 5.0);
+
+        let r2 = r1.transform(m);
+        let expected_origin = primatives::point(4.0, 6.0, 8.0);
+        let expected_direction = primatives::vec3(0.0, 1.0, 0.0);
+
+        assert_eq!(r2.origin, expected_origin);
+        assert_eq!(r2.direction, expected_direction);
+
+        let r = ray::new(primatives::point(1.0, 2.0, 3.0), primatives::vec3(0.0, 1.0, 0.0));
+        let m = transformations::new_scaling(2.0, 3.0, 4.0);
+
+        let r3 = r.transform(m);
+        let expected_origin = primatives::point(2.0, 6.0, 12.0);
+        let expected_direction = primatives::vec3(0.0, 3.0, 0.0);
+
+        assert_eq!(r3.origin, expected_origin);
+        assert_eq!(r3.direction, expected_direction);
+    }
 }
 
 #[cfg(test)]
@@ -885,6 +909,8 @@ mod shape_test {
     use crate::shapes;
     use crate::shapes::Shape;
     use crate::ray;
+    use crate::matrix;
+    use crate::matrix::transformations;
 
     #[test]
     #[should_panic]
@@ -895,6 +921,7 @@ mod shape_test {
         let c1 = shapes::new_sphere(radius, p1);
         assert_eq!(p1, c1.origin);
         assert_eq!(radius, c1.radius);
+        assert_eq!(c1.transformation, matrix::IDENTITY_MATRIX_4X4);
 
         let v1 = primatives::vec3(0.0, 0.0, 1.0);
         shapes::new_sphere(radius, v1);
@@ -930,5 +957,28 @@ mod shape_test {
         let intersections = s4.intersect(r4);
 
         assert_eq!(intersections.len(), 2);
+
+        let s5 = shapes::new_sphere(2.0, primatives::point(0.0, 0.0, 0.0));
+        let r5 = ray::new(primatives::point(0.0, 0.0, 0.0), primatives::vec3(0.0, 0.0, 1.0));
+        let intersections = s5.intersect(r5);
+        assert_eq!(intersections.len(), 2);
+        assert_eq!(intersections[0], primatives::point(0.0, 0.0, 2.0));
+        assert_eq!(intersections[1], primatives::point(0.0, 0.0, -2.0));
+
+        let r = ray::new(primatives::point(0.0, 0.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
+        let mut s = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 0.0));
+        s.transformation = transformations::new_scaling(2.0, 2.0, 2.0);
+
+        let intersections = s.intersect(r);
+        assert_eq!(intersections.len(), 2);
+        assert_eq!(intersections[0], r.position(7.0));
+        assert_eq!(intersections[1], r.position(3.0));
+
+        let r = ray::new(primatives::point(0.0, 0.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
+        let mut s = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 0.0));
+        s.transformation = transformations::new_translation(5.0, 0.0, 0.0);
+
+        let intersections = s.intersect(r);
+        assert_eq!(intersections.len(), 0);
     }
 }

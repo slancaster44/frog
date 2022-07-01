@@ -1,5 +1,6 @@
 use crate::primatives;
 use crate::ray;
+use crate::matrix;
 
 pub trait Shape {
     fn intersect(&self, r: ray::Ray) -> Vec<primatives::Tuple>;
@@ -7,14 +8,16 @@ pub trait Shape {
 
 pub struct Sphere {
     pub radius: f64,
-    pub origin: primatives::Tuple
+    pub origin: primatives::Tuple,
+    pub transformation: matrix::Matrix4x4
 }
 
 pub fn new_sphere(r: f64, o: primatives::Tuple) -> Sphere {
     o.check_type(primatives::TYPE_PNT);
     return Sphere {
         radius: r,
-        origin: o
+        origin: o,
+        transformation: matrix::IDENTITY_MATRIX_4X4
     }
 }
 
@@ -28,7 +31,9 @@ impl Shape for Sphere {
      * this function solves that quadratic to find the points on the ray
      * that intersect the sphere.
      */
-    fn intersect(&self, r: ray::Ray) -> Vec<primatives::Tuple> {
+    fn intersect(&self, r_input: ray::Ray) -> Vec<primatives::Tuple> {
+        let r = r_input.transform(self.transformation.inverse());
+
         let sphere_to_ray = r.origin - self.origin;
 
         let a = primatives::dot_product(r.direction, r.direction);
@@ -48,6 +53,7 @@ impl Shape for Sphere {
 
         let mut ret_val = vec![];
         for i in t_values {
+            //Note: I only really have a hunch that it actually works this way
             ret_val.push(r.position(i));
         }
 
