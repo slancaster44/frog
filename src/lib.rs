@@ -911,6 +911,8 @@ mod shape_test {
     use crate::ray;
     use crate::matrix;
     use crate::matrix::transformations;
+    use crate::canvas;
+    use crate::color;
 
     #[test]
     #[should_panic]
@@ -980,5 +982,25 @@ mod shape_test {
 
         let intersections = s.intersect(r);
         assert_eq!(intersections.len(), 0);
+    }
+
+    #[test]
+    fn draw_sphere_intersection() {
+        let s = shapes::new_sphere(75.0, primatives::point(75.0, 75.0, 0.0));
+        let c1 = color::new(0.5, 1.0, 1.0);
+        let mut this_canvas = canvas::new(150, 150);
+        this_canvas.origin = (0, 0);
+
+        for x_coord in 0..150 {
+            for y_coord in 0..150 {
+                let r = ray::new(primatives::point(x_coord as f64, y_coord as f64, 0.0), primatives::vec3(0.0, 0.0, 1.0));
+                let intersections = s.intersect(r);
+                if intersections.len() != 0 {
+                    this_canvas.plot(x_coord, y_coord, c1);
+                }
+            }
+        }
+
+        this_canvas.write_to_ppm("sphere_2d.ppm");
     }
 }

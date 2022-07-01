@@ -53,7 +53,6 @@ impl Shape for Sphere {
 
         let mut ret_val = vec![];
         for i in t_values {
-            //Note: I only really have a hunch that it actually works this way
             ret_val.push(r_input.position(i));
         }
 
