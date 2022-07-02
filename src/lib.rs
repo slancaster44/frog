@@ -676,7 +676,7 @@ mod matrix_tranformations {
 
     #[test]
     fn translation() {
-        let translation = transformations::new_translation(5.0, -3.0, 2.0);
+        let translation = transformations::new_translation_matrix(5.0, -3.0, 2.0);
         let p1 = primatives::point(-3.0, 4.0, 5.0);
 
         let tranformed_point = translation * p1;
@@ -696,7 +696,7 @@ mod matrix_tranformations {
 
     #[test]
     fn scaling() {
-        let transform = transformations::new_scaling(2.0, 3.0, 4.0);
+        let transform = transformations::new_scaling_matrix(2.0, 3.0, 4.0);
 
         let p1 = primatives::point(-4.0, 6.0, 8.0);
         let expected = primatives::point(-8.0, 18.0, 32.0);
@@ -720,8 +720,8 @@ mod matrix_tranformations {
         let p1 = primatives::point(0.0, 1.0, 0.0);
 
         let pi = transformations::PI;
-        let half_quarter = transformations::new_rotation_x(pi / 4.0);
-        let full_quarter = transformations::new_rotation_x(pi / 2.0);
+        let half_quarter = transformations::new_rotation_x_matrix(pi / 4.0);
+        let full_quarter = transformations::new_rotation_x_matrix(pi / 2.0);
      
         let root_2_over_2 = (2.0_f64).sqrt() / 2.0;
         let expected = primatives::point(0.0, root_2_over_2, root_2_over_2);
@@ -739,8 +739,8 @@ mod matrix_tranformations {
         let p1 = primatives::point(0.0, 0.0, 1.0);
 
         let pi = transformations::PI;
-        let half_quarter = transformations::new_rotation_y(pi / 4.0);
-        let full_quarter = transformations::new_rotation_y(pi / 2.0);
+        let half_quarter = transformations::new_rotation_y_matrix(pi / 4.0);
+        let full_quarter = transformations::new_rotation_y_matrix(pi / 2.0);
 
         let root_2_over_2 = (2.0_f64).sqrt() / 2.0;
         let expected = primatives::point(root_2_over_2, 0.0, root_2_over_2);
@@ -758,8 +758,8 @@ mod matrix_tranformations {
         let p1 = primatives::point(0.0, 1.0, 0.0);
 
         let pi = transformations::PI;
-        let half_quarter = transformations::new_rotation_z(pi / 4.0);
-        let full_quarter = transformations::new_rotation_z(pi / 2.0);
+        let half_quarter = transformations::new_rotation_z_matrix(pi / 4.0);
+        let full_quarter = transformations::new_rotation_z_matrix(pi / 2.0);
 
         let root_2_over_2 = (2.0_f64).sqrt() / 2.0;
         let expected = primatives::point(-root_2_over_2, root_2_over_2, 0.0);
@@ -776,27 +776,27 @@ mod matrix_tranformations {
     fn shearing() {
         let p1 = primatives::point(2.0, 3.0, 4.0);
 
-        let transform = transformations::new_shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let transform = transformations::new_shearing_matrix(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         let expected = primatives::point(5.0, 3.0, 4.0);
         assert_eq!(transform * p1, expected);
 
-        let transform = transformations::new_shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+        let transform = transformations::new_shearing_matrix(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
         let expected = primatives::point(6.0, 3.0, 4.0);
         assert_eq!(transform * p1, expected);
 
-        let transform = transformations::new_shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+        let transform = transformations::new_shearing_matrix(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
         let expected = primatives::point(2.0, 5.0, 4.0);
         assert_eq!(transform * p1, expected);
 
-        let transform = transformations::new_shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        let transform = transformations::new_shearing_matrix(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
         let expected = primatives::point(2.0, 7.0, 4.0);
         assert_eq!(transform * p1, expected);
 
-        let transform = transformations::new_shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        let transform = transformations::new_shearing_matrix(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
         let expected = primatives::point(2.0, 3.0, 6.0);
         assert_eq!(transform * p1, expected);
 
-        let transform = transformations::new_shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        let transform = transformations::new_shearing_matrix(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
         let expected = primatives::point(2.0, 3.0, 7.0);
         assert_eq!(transform * p1, expected);
         assert_eq!(transform.inverse() * expected, p1);
@@ -809,7 +809,7 @@ mod matrix_tranformations {
         let p1 = primatives::point(100.0, 100.0, 0.0);
 
         let pi = transformations::PI;
-        let clock_rotation = transformations::new_rotation_z((2.0 * pi) / 12.0);
+        let clock_rotation = transformations::new_rotation_z_matrix((2.0 * pi) / 12.0);
 
         let c1 = color::new(1.0, 0.0, 0.0);
         can.plot(p1.x as i32, p1.y as i32, c1);
@@ -882,9 +882,9 @@ mod ray_tests {
     #[test]
     fn ray_transformations() {
         let r1 = ray::new(primatives::point(1.0, 2.0, 3.0), primatives::vec3(0.0, 1.0, 0.0));
-        let m = transformations::new_translation(3.0, 4.0, 5.0);
+        let m = transformations::new_translation_matrix(3.0, 4.0, 5.0);
 
-        let r2 = r1.transform(m);
+        let r2 = m * r1;
         let expected_origin = primatives::point(4.0, 6.0, 8.0);
         let expected_direction = primatives::vec3(0.0, 1.0, 0.0);
 
@@ -892,9 +892,9 @@ mod ray_tests {
         assert_eq!(r2.direction, expected_direction);
 
         let r = ray::new(primatives::point(1.0, 2.0, 3.0), primatives::vec3(0.0, 1.0, 0.0));
-        let m = transformations::new_scaling(2.0, 3.0, 4.0);
+        let m = transformations::new_scaling_matrix(2.0, 3.0, 4.0);
 
-        let r3 = r.transform(m);
+        let r3 = m * r;
         let expected_origin = primatives::point(2.0, 6.0, 12.0);
         let expected_direction = primatives::vec3(0.0, 3.0, 0.0);
 
@@ -907,9 +907,7 @@ mod ray_tests {
 mod shape_test {
     use crate::primatives;
     use crate::shapes;
-    use crate::shapes::Shape;
     use crate::ray;
-    use crate::matrix;
     use crate::matrix::transformations;
     use crate::canvas;
     use crate::color;
@@ -920,18 +918,17 @@ mod shape_test {
         let p1 = primatives::point(0.0, 0.0, 0.0);
         let radius = 2.0;
 
-        let c1 = shapes::new_sphere(radius, p1);
+        let c1 = shapes::sphere::new(radius, p1);
         assert_eq!(p1, c1.origin);
         assert_eq!(radius, c1.radius);
-        assert_eq!(c1.transformation, matrix::IDENTITY_MATRIX_4X4);
 
         let v1 = primatives::vec3(0.0, 0.0, 1.0);
-        shapes::new_sphere(radius, v1);
+        shapes::sphere::new(radius, v1);
     }
 
     #[test]
     fn ray_sphere_intersection() {
-        let s1 = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 0.0));
+        let s1 = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
 
         let r1 = ray::new(primatives::point(0.0, 0.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
         let intersections = s1.intersect(r1);
@@ -940,27 +937,27 @@ mod shape_test {
         assert_eq!(intersections[0], r1.position(6.0));
         assert_eq!(intersections[1], r1.position(4.0));
 
-        let s2 = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 0.0));
+        let s2 = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
         let r2 = ray::new(primatives::point(0.0, 1.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
         let intersections = s2.intersect(r2);
 
         assert_eq!(intersections.len(), 1);
         assert_eq!(intersections[0], r2.position(5.0));
 
-        let s3 = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 1.0));
+        let s3 = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 1.0));
         let r3 = ray::new(primatives::point(0.0, 2.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
         let intersections = s3.intersect(r3);
 
         assert_eq!(intersections.len(), 0);
 
         //Ensures that intersections behind ray origin are detected
-        let s4 = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 0.0));
+        let s4 = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
         let r4 = ray::new(primatives::point(0.0, 0.0, 0.0,), primatives::vec3(0.0, 0.0, 1.0));
         let intersections = s4.intersect(r4);
 
         assert_eq!(intersections.len(), 2);
 
-        let s5 = shapes::new_sphere(2.0, primatives::point(0.0, 0.0, 0.0));
+        let s5 = shapes::sphere::new(2.0, primatives::point(0.0, 0.0, 0.0));
         let r5 = ray::new(primatives::point(0.0, 0.0, 0.0), primatives::vec3(0.0, 0.0, 1.0));
         let intersections = s5.intersect(r5);
         assert_eq!(intersections.len(), 2);
@@ -968,8 +965,8 @@ mod shape_test {
         assert_eq!(intersections[1], primatives::point(0.0, 0.0, -2.0));
 
         let r = ray::new(primatives::point(0.0, 0.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
-        let mut s = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 0.0));
-        s.transformation = transformations::new_scaling(2.0, 2.0, 2.0);
+        let mut s = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
+        s = transformations::new_scaling_matrix(2.0, 2.0, 2.0) * s;
 
         let intersections = s.intersect(r);
         assert_eq!(intersections.len(), 2);
@@ -977,16 +974,17 @@ mod shape_test {
         assert_eq!(intersections[1], r.position(3.0));
 
         let r = ray::new(primatives::point(0.0, 0.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
-        let mut s = shapes::new_sphere(1.0, primatives::point(0.0, 0.0, 0.0));
-        s.transformation = transformations::new_translation(5.0, 0.0, 0.0);
+        let mut s = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
+        s = transformations::new_translation_matrix(5.0, 0.0, 0.0) * s;
 
         let intersections = s.intersect(r);
         assert_eq!(intersections.len(), 0);
     }
 
     #[test]
+    #[ignore]
     fn draw_sphere_intersection() {
-        let s = shapes::new_sphere(75.0, primatives::point(75.0, 75.0, 0.0));
+        let s = shapes::sphere::new(75.0, primatives::point(75.0, 75.0, 0.0));
         let c1 = color::new(0.5, 1.0, 1.0);
         let mut this_canvas = canvas::new(150, 150);
         this_canvas.origin = (0, 0);

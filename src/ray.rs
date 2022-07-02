@@ -1,3 +1,5 @@
+use std::ops;
+
 use crate::primatives;
 use crate::matrix;
 
@@ -17,18 +19,21 @@ pub fn new(origin: primatives::Tuple, direction: primatives::Tuple) -> Ray {
     }
 }
 
+impl ops::Mul<Ray> for matrix::Matrix4x4 {
+    type Output = Ray;
+    fn mul(self, r: Ray) -> Ray {
+        return Ray {
+            origin: self * r.origin,
+            direction: self * r.direction
+        }
+    }
+}
+
 impl Ray {
     pub fn position(&self, time: f64) -> primatives::Tuple {
         //Enlage direction vectory by the time, and then add
         //that to the origin point to get the ray's current location
         return self.origin + (self.direction * time);
-    }
-
-    pub fn transform(&self, m: matrix::Matrix4x4) -> Ray{
-        Ray {
-            origin: m * self.origin,
-            direction: m * self.direction
-        }
     }
 }
 
