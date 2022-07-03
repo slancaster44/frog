@@ -215,6 +215,21 @@ mod primatives_tests {
         assert_ne!(vec1, vec3);
     }
 
+    #[test]
+    fn reflection() {
+        let v1 = primatives::vec3(1.0, -1.0, 0.0);
+        let normal = primatives::vec3(0.0, 1.0, 0.0);
+        let r = normal.reflect(v1);
+
+        assert_eq!(r, primatives::vec3(1.0, 1.0, 0.0));
+
+        let v2 = primatives::vec3(0.0, -1.0, 0.0);
+        let normal = primatives::vec3(2.0_f64.sqrt()/2.0, 2.0_f64.sqrt()/2.0, 0.0);
+        let r = normal.reflect(v2);
+
+        assert_eq!(r, primatives::vec3(1.0, 0.0, 0.0));
+    }
+
     #[ignore]
     #[test]
     fn projectile_test() {

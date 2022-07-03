@@ -63,6 +63,13 @@ impl Tuple {
             w:self.w / mag
         };
     }
+
+    pub fn reflect(self, v: Vec3T) -> Vec3T {
+        v.check_type(TYPE_VEC);
+        self.check_type(TYPE_VEC);
+
+        return v - self * 2.0 * dot_product(v, self);
+    }
 }
 
 impl ops::Add<Tuple> for Tuple {
