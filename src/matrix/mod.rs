@@ -161,7 +161,23 @@ impl ops::Mul<Matrix4x4> for Matrix4x4 {
     }
 }
 
+
 impl ops::Mul<primatives::Tuple> for Matrix4x4 {
+    type Output = primatives::Tuple;
+    fn mul(self, t1:primatives::Tuple) -> primatives::Tuple {
+        return primatives::Tuple {
+            x: (self[0][0] * t1.x) + (self[0][1] * t1.y) + (self[0][2] * t1.z) + (self[0][3] * t1.w),
+            y: (self[1][0] * t1.x) + (self[1][1] * t1.y) + (self[1][2] * t1.z) + (self[1][3] * t1.w),
+            z: (self[2][0] * t1.x) + (self[2][1] * t1.y) + (self[2][2] * t1.z) + (self[2][3] * t1.w),
+            w: (self[3][0] * t1.x) + (self[3][1] * t1.y) + (self[3][2] * t1.z) + (self[3][3] * t1.w)
+        };
+    }
+}
+
+//Rust is dumb. THE ONLY DIFFERENCE IS THAT THIS IS A REFERNCE TO A MATRIX. *anger*
+//Thank the lord for copy-paste. And if any future genius can figure out how to get
+//rid of this code duplication. Let me know how they did it. lancasterharp@gmail.com
+impl ops::Mul<primatives::Tuple> for &Matrix4x4 {
     type Output = primatives::Tuple;
     fn mul(self, t1:primatives::Tuple) -> primatives::Tuple {
         return primatives::Tuple {

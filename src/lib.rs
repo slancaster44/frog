@@ -904,7 +904,7 @@ mod ray_tests {
 }
 
 #[cfg(test)]
-mod shape_test {
+mod sphere_test {
     use crate::primatives;
     use crate::shapes;
     use crate::ray;
@@ -1000,5 +1000,51 @@ mod shape_test {
         }
 
         this_canvas.write_to_ppm("sphere_2d.ppm");
+    }
+
+    #[test]
+    fn sphere_normal() {
+        let s = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
+        let n = s.normal_at(primatives::point(1.0, 0.0, 0.0));
+
+        n.check_type(primatives::TYPE_VEC);
+        assert_eq!(n, primatives::vec3(1.0, 0.0, 0.0));
+
+        assert_eq!(n.normalized(), n);
+
+        let s = shapes::sphere::new(2.0, primatives::point(0.0, 0.0, 0.0));
+        let n = s.normal_at(primatives::point(0.0, 2.0, 0.0));
+
+        n.check_type(primatives::TYPE_VEC);
+        assert_eq!(n, primatives::vec3(0.0, 1.0, 0.0));
+
+        assert_eq!(n.normalized(), n);
+
+        let s = shapes::sphere::new(2.0, primatives::point(1.0, 1.0, 1.0));
+        let n = s.normal_at(primatives::point(1.0, 1.0, 3.0));
+
+        n.check_type(primatives::TYPE_VEC);
+        assert_eq!(n, primatives::vec3(0.0, 0.0, 1.0));
+
+        assert_eq!(n.normalized(), n);
+
+        let mut s = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
+        s = transformations::new_translation_matrix(0.0, 1.0, 0.0) * s;
+        let n = s.normal_at(primatives::point(0.0, 1.70711, -0.70711));
+
+        n.check_type(primatives::TYPE_VEC);
+        assert_eq!(n, primatives::vec3(0.0, 0.70711, -0.70711));
+
+        assert_eq!(n.normalized(), n);
+        
+        let mut s = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
+        s = transformations::new_scaling_matrix(1.0, 0.5, 1.0) * s;
+        s = transformations::new_rotation_z_matrix(transformations::PI / 5.0) * s;
+        let n = s.normal_at(primatives::point(0.0, 2.0_f64.sqrt() / 2.0, -2.0_f64.sqrt() / 2.0));
+
+        n.check_type(primatives::TYPE_VEC);
+        assert_eq!(n, primatives::vec3(0.0, 0.97014, -0.24254));
+
+        assert_eq!(n.normalized(), n);
     }
 }

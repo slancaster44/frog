@@ -7,7 +7,7 @@ use crate::matrix;
 pub struct Sphere {
     pub radius: f64,
     pub origin: primatives::Tuple,
-    pub transformations: Vec<matrix::Matrix4x4>
+    pub transformation: matrix::Matrix4x4
 }
 
 pub fn new(r: f64, o: primatives::Tuple) -> Sphere {
@@ -15,18 +15,17 @@ pub fn new(r: f64, o: primatives::Tuple) -> Sphere {
     return Sphere {
         radius: r,
         origin: o,
-        transformations: vec![]
+        transformation: matrix::IDENTITY_MATRIX_4X4
     }
 }
 
 impl ops::Mul<Sphere> for matrix::Matrix4x4 {
     type Output = Sphere;
-    fn mul(self, mut s: Sphere) -> Sphere {
-        s.transformations.push(self);
+    fn mul(self, s: Sphere) -> Sphere {
         return Sphere {
             radius: s.radius,
             origin: s.origin,
-            transformations: s.transformations,
+            transformation: s.transformation * self,
         }
     }
 }
@@ -42,10 +41,7 @@ impl Sphere {
      * that intersect the sphere.
      */
     pub fn intersect(&self, r_input: ray::Ray) -> Vec<primatives::Tuple> {
-        let mut r = r_input;
-        for trans in &self.transformations {
-            r = trans.inverse() * r;
-        }
+        let r = self.transformation.inverse() * r_input;
 
         let sphere_to_ray = r.origin - self.origin;
 
@@ -70,5 +66,22 @@ impl Sphere {
         }
 
         return ret_val
+    }
+
+    pub fn normal_at(&self, p: primatives::Tuple) -> primatives::Vec3T {
+        p.check_type(primatives::TYPE_PNT);
+
+        //Remove transformations from input point
+        let point = self.transformation.inverse() * p;
+
+        //Find what the normal vector would be if the sphere
+        //had no transformations
+        let obj_normal = point - self.origin;
+
+        //Reapply the transformations to the normal vector to get actual normal
+        let mut world_normal = self.transformation.inverse().transposed() * obj_normal;
+        world_normal.w = 0.0;
+
+        return world_normal.normalized()
     }
 }
