@@ -8,6 +8,7 @@ pub mod shapes;
 pub mod light;
 pub mod material;
 pub mod shading;
+pub mod world;
 
 #[cfg(test)]
 mod primatives_tests {
@@ -1206,5 +1207,50 @@ mod light_and_material {
 
         this_canvas = this_canvas.antialiased(4);
         this_canvas.write_to_ppm("sphere_shaded.ppm");
+    }
+}
+
+#[cfg(test)]
+mod world_test {
+    use crate::world;
+    use crate::shapes::sphere;
+    use crate::shapes::{Shape};
+    use crate::primatives;
+    use crate::color;
+    use crate::matrix::transformations;
+    use crate::ray;
+
+    #[test]
+    fn world_creation() {
+        let mut w = world::new();
+        
+        let mut s1 = sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
+        s1.material.color = color::new(0.8, 1.0, 0.6);
+        s1.material.diffuse = 0.7;
+        s1.material.specular = 0.2;
+        w.objects.push(&s1);
+
+        let mut s2 = sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
+        let trans = transformations::new_scaling_matrix(0.5, 0.5, 0.5);
+        s2 = trans * s2;
+        w.objects.push(&s2);
+
+        let r1 = ray::new(primatives::point(0.0, 0.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
+        let intersections = w.intersect(r1);
+
+        assert_eq!(intersections.len(), 4);
+        assert_eq!(intersections[0].time, 4.0);
+        assert_eq!(intersections[1].time, 4.5);
+        assert_eq!(intersections[2].time, 5.5);
+        assert_eq!(intersections[3].time, 6.0);
+
+        let intersections = s1.intersect(r1);
+        assert_eq!(intersections[1].eyev, primatives::vec3(0.0, 0.0, -1.0));
+        assert_eq!(intersections[1].normalv, primatives::vec3(0.0, 0.0, -1.0));
+        assert_eq!(intersections[1].inside, false);
+
+        let r2 = ray::new(primatives::point(0.0, 0.0, 0.0), primatives::vec3(0.0, 0.0, 1.0));
+        let intersections = s1.intersect(r2);
+        assert_eq!(intersections[0].inside, true);
     }
 }

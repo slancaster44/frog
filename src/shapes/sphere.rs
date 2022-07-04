@@ -69,7 +69,7 @@ impl shapes::Shape for Sphere {
 
         let mut ret_val = vec![];
         for i in t_values {
-            let intersect = intersection::new(i, r_input.position(i), self);
+            let intersect = intersection::new(i, r_input.position(i), self, r_input);
             ret_val.push(intersect);
         }
 
