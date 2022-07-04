@@ -68,6 +68,7 @@ impl Tuple {
         v.check_type(TYPE_VEC);
         self.check_type(TYPE_VEC);
 
+        //But, like, how?
         return v - self * 2.0 * dot_product(v, self);
     }
 }

@@ -3,11 +3,13 @@ use std::ops;
 use crate::primatives;
 use crate::ray;
 use crate::matrix;
+use crate::material;
 
 pub struct Sphere {
     pub radius: f64,
     pub origin: primatives::Tuple,
-    pub transformation: matrix::Matrix4x4
+    pub transformation: matrix::Matrix4x4,
+    pub material: material::Material
 }
 
 pub fn new(r: f64, o: primatives::Tuple) -> Sphere {
@@ -15,7 +17,8 @@ pub fn new(r: f64, o: primatives::Tuple) -> Sphere {
     return Sphere {
         radius: r,
         origin: o,
-        transformation: matrix::IDENTITY_MATRIX_4X4
+        transformation: matrix::IDENTITY_MATRIX_4X4,
+        material: material::new_default()
     }
 }
 
@@ -26,6 +29,7 @@ impl ops::Mul<Sphere> for matrix::Matrix4x4 {
             radius: s.radius,
             origin: s.origin,
             transformation: s.transformation * self,
+            material: s.material
         }
     }
 }

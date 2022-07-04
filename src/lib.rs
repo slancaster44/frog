@@ -5,6 +5,9 @@ pub mod color;
 pub mod canvas;
 pub mod ray;
 pub mod shapes;
+pub mod light;
+pub mod material;
+pub mod shading;
 
 #[cfg(test)]
 mod primatives_tests {
@@ -361,11 +364,14 @@ mod canvas_tests {
     use crate::color;
 
     #[test]
+    #[ignore]
     fn test_canvas_creation() {
         let canvas = canvas::new(1080, 960);
         assert_eq!(canvas.width, 1080);
         assert_eq!(canvas.height, 960);
         assert_eq!(canvas.contents[0], color::new(0.0, 0.0, 0.0));
+
+        canvas.antialiased(4);
     }
 
     #[test]
@@ -926,6 +932,7 @@ mod sphere_test {
     use crate::matrix::transformations;
     use crate::canvas;
     use crate::color;
+    use crate::material;
 
     #[test]
     #[should_panic]
@@ -936,6 +943,7 @@ mod sphere_test {
         let c1 = shapes::sphere::new(radius, p1);
         assert_eq!(p1, c1.origin);
         assert_eq!(radius, c1.radius);
+        assert_eq!(material::new_default(), c1.material);
 
         let v1 = primatives::vec3(0.0, 0.0, 1.0);
         shapes::sphere::new(radius, v1);
@@ -994,6 +1002,12 @@ mod sphere_test {
 
         let intersections = s.intersect(r);
         assert_eq!(intersections.len(), 0);
+
+        let r = ray::new(primatives::point(300.0, 300.0, 0.0), primatives::vec3(300.0, 300.0, 300.0));
+        let mut s = shapes::sphere::new(1.0, primatives::point(300.0, 300.0, 300.0));
+        s = transformations::new_scaling_matrix(300.0, 300.0, 300.0) * s;
+        let intersections = s.intersect(r);
+        assert_eq!(intersections.len(), 2);
     }
 
     #[test]
@@ -1061,5 +1075,131 @@ mod sphere_test {
         assert_eq!(n, primatives::vec3(0.0, 0.97014, -0.24254));
 
         assert_eq!(n.normalized(), n);
+    }
+}
+
+#[cfg(test)]
+mod light_and_material {
+    use crate::color;
+    use crate::primatives;
+    use crate::light;
+    use crate::material;
+    use crate::shading;
+    use crate::shapes;
+    use crate::ray;
+    use crate::matrix::transformations;
+    use crate::canvas;
+
+    #[test]
+    fn light_creation() {
+        let i = color::new(1.0, 1.0, 1.0);
+        let l = primatives::point(0.0, 0.0, 0.0);
+
+        let light = light::new(i, l);
+        assert_eq!(light.intensity, i);
+        assert_eq!(light.location, l);
+    }
+
+    #[test]
+    fn material_creation() {
+        let m = material::new_default();
+
+        assert_eq!(m.ambient, 0.1);
+        assert_eq!(m.diffuse, 0.9);
+        assert_eq!(m.specular, 0.9);
+        assert_eq!(m.shininess, 200.0);
+    }
+
+    #[test]
+    fn lighting_test() {
+        let location_to_be_lit = primatives::point(0.0, 0.0, 0.0);
+        let material_for_item = material::new_default();
+
+        //Test what happens when light is behind the eye.
+        let location_of_eye = primatives::point(0.0, 0.0, -1.0);
+        let vec_from_eye_to_location = location_of_eye - location_to_be_lit;
+        assert_eq!(vec_from_eye_to_location, primatives::vec3(0.0, 0.0, -1.0));
+
+        let normal_vec = primatives::vec3(0.0, 0.0, -1.0); //placeholder; in a real scene this will be calculted off a shape
+        let light = light::new(color::new(1.0, 1.0, 1.0), primatives::point(0.0, 0.0, -10.0)); //Light is behind eye
+
+        let result = shading::shade(material_for_item, light, location_to_be_lit, vec_from_eye_to_location, normal_vec);
+        let expected = color::new(1.9, 1.9, 1.9);
+        assert_eq!(expected, result);
+
+        //When the eye is above the light source
+        let eyev = primatives::vec3(0.0, 2.0_f64.sqrt()/2.0, -2.0_f64.sqrt()/2.0);
+        let normalv = primatives::vec3(0.0, 0.0, -1.0);
+        let light = light::new(color::new(1.0, 1.0, 1.0), primatives::point(0.0, 0.0, -10.0));
+
+        let result = shading::shade(material_for_item, light, location_to_be_lit, eyev, normalv);
+        let expected = color::new(1.0, 1.0, 1.0);
+        assert_eq!(result, expected);
+
+        //When light is above eye
+        let eyev = primatives::vec3(0.0, 0.0, -1.0);
+        let normalv = primatives::vec3(0.0, 0.0, -1.0);
+        let light = light::new(color::new(1.0, 1.0, 1.0), primatives::point(0.0, 10.0, -10.0));
+
+        let result = shading::shade(material_for_item, light, location_to_be_lit, eyev, normalv);
+        let expected = color::new(0.7364, 0.7364, 0.7364);
+        assert_eq!(result, expected);
+
+        //When specular component is at full strength
+        let eyev = primatives::vec3(0.0, -2.0_f64.sqrt()/2.0, -2.0_f64.sqrt()/2.0);
+        let normalv = primatives::vec3(0.0, 0.0, -1.0);
+        let light = light::new(color::new(1.0, 1.0, 1.0), primatives::point(0.0, 10.0, -10.0));
+
+        let result = shading::shade(material_for_item, light, location_to_be_lit, eyev, normalv);
+        let expected = color::new(1.6364, 1.6364, 1.6364);
+        assert_eq!(result, expected);
+
+        //When light is behind the surface
+        let eyev = primatives::vec3(0.0, 0.0, -1.0);
+        let normalv = primatives::vec3(0.0, 0.0, -1.0);
+        let light = light::new(color::new(1.0, 1.0, 1.0), primatives::point(0.0, 0.0, 10.0));
+
+        let result = shading::shade(material_for_item, light, location_to_be_lit, eyev, normalv);
+        let expected = color::new(0.1, 0.1, 0.1);
+        assert_eq!(result, expected);
+
+        
+    }
+
+    #[test]
+    //#[ignore]
+    fn draw_sphere_shaded() {
+        let mut s = shapes::sphere::new(300.0, primatives::point(350.0, 350.0, 0.0));
+        s.material.color = color::new(1.0, 0.5, 1.0);
+
+        let light = light::new(color::new(1.0, 1.0, 1.0), primatives::point(-200.0, -400.0, 800.0));
+        
+        let mut vantage_point = primatives::point(400.0, 400.0, 400.0);
+        let trans = transformations::new_rotation_y_matrix(transformations::PI);
+        vantage_point = trans * vantage_point;
+
+        let mut this_canvas = canvas::new(700, 700);
+        this_canvas.origin = (0, 0);
+
+        for x_coord in 0..this_canvas.width {
+            for y_coord in 0..this_canvas.height {
+                let r = ray::new(primatives::point(x_coord as f64, y_coord as f64, 0.0), primatives::vec3(0.0, 0.0, 1.0));
+                let intersections = s.intersect(r);
+
+                if intersections.len() != 0 {
+                    let pnt = intersections[0];
+                    pnt.check_type(primatives::TYPE_PNT);
+
+                    let normalv = s.normal_at(pnt);
+                    let eyev = vantage_point - pnt;
+
+                    let c1 = shading::shade(s.material, light, pnt, eyev, normalv);
+                    this_canvas.plot(x_coord as i32, y_coord as i32, c1);
+                }
+            }
+        }
+
+        this_canvas = this_canvas.antialiased(4);
+        this_canvas.write_to_ppm("sphere_shaded.ppm");
     }
 }

@@ -56,4 +56,52 @@ impl Canvas {
             file.write_all(pixel_as_text.as_bytes()).expect("Failed to write pixel");
         }
     }
+
+    pub fn antialiased(&self, r: i32) -> Canvas {
+        let mut ret_val = new(self.width, self.height);
+
+        for x_loc in 0..self.width {
+            for y_loc in 0..self.height {
+                let location = (y_loc * self.width) + x_loc; 
+                
+                let mut surrounding_locations = vec![];
+                let w = self.width as i32;
+                for i in 0..r {
+                    for j in 0..r {
+                        let (x1, x2) = ((x_loc as i32) + i, (x_loc as i32) - i);
+                        let (y1, y2) = ((y_loc as i32) + j, (y_loc as i32) - j);
+                        
+                        let locations_to_be_added: [i32; 4] = [
+                            (y1 * w) + x1,
+                            (y1 * w) + x2,
+                            (y2 * w) + x1,
+                            (y2 * w) + x2
+                        ];
+
+                        for l in locations_to_be_added {
+                            if l >= 0 && l < (self.contents.len() as i32) {
+                                surrounding_locations.push(l);
+                            }
+                        }
+                    }
+                }
+
+                let mut avg_color = color::new(0.0, 0.0, 0.0);
+                let size = surrounding_locations.len() as f64;
+                for loc in surrounding_locations {
+                    let c = self.contents[loc as usize];
+                    avg_color = avg_color + c;
+                }
+                avg_color.red = avg_color.red / size;
+                avg_color.green = avg_color.green / size;
+                avg_color.blue = avg_color.blue / size;
+
+                ret_val.contents[location] = avg_color;
+            }
+        }
+
+        return ret_val
+    }
+
+
 }

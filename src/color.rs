@@ -7,6 +7,12 @@ pub struct Color {
     pub blue: f64
 }
 
+pub const BLACK: Color = Color {
+    red: 0.0,
+    green: 0.0,
+    blue: 0.0
+};
+
 pub fn new(r:f64, g:f64, b:f64) -> Color {
     return Color {
         red:r,
