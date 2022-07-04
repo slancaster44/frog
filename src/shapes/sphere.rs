@@ -4,7 +4,9 @@ use crate::primatives;
 use crate::ray;
 use crate::matrix;
 use crate::material;
+use crate::ray::intersection;
 
+#[derive(Debug)]
 pub struct Sphere {
     pub radius: f64,
     pub origin: primatives::Tuple,
@@ -44,7 +46,7 @@ impl Sphere {
      * this function solves that quadratic to find the points on the ray
      * that intersect the sphere.
      */
-    pub fn intersect(&self, r_input: ray::Ray) -> Vec<primatives::Tuple> {
+    pub fn intersect(&self, r_input: ray::Ray) -> Vec<intersection::Intersection<&Sphere>> {
         let r = self.transformation.inverse() * r_input;
 
         let sphere_to_ray = r.origin - self.origin;
@@ -66,7 +68,8 @@ impl Sphere {
 
         let mut ret_val = vec![];
         for i in t_values {
-            ret_val.push(r_input.position(i));
+            let intersect = intersection::new(i, r_input.position(i), self);
+            ret_val.push(intersect);
         }
 
         return ret_val

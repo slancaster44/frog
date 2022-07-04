@@ -957,15 +957,15 @@ mod sphere_test {
         let intersections = s1.intersect(r1);
         
         assert_eq!(intersections.len(), 2);
-        assert_eq!(intersections[0], r1.position(6.0));
-        assert_eq!(intersections[1], r1.position(4.0));
+        assert_eq!(intersections[0].location, r1.position(6.0));
+        assert_eq!(intersections[1].location, r1.position(4.0));
 
         let s2 = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
         let r2 = ray::new(primatives::point(0.0, 1.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
         let intersections = s2.intersect(r2);
 
         assert_eq!(intersections.len(), 1);
-        assert_eq!(intersections[0], r2.position(5.0));
+        assert_eq!(intersections[0].location, r2.position(5.0));
 
         let s3 = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 1.0));
         let r3 = ray::new(primatives::point(0.0, 2.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
@@ -984,8 +984,8 @@ mod sphere_test {
         let r5 = ray::new(primatives::point(0.0, 0.0, 0.0), primatives::vec3(0.0, 0.0, 1.0));
         let intersections = s5.intersect(r5);
         assert_eq!(intersections.len(), 2);
-        assert_eq!(intersections[0], primatives::point(0.0, 0.0, 2.0));
-        assert_eq!(intersections[1], primatives::point(0.0, 0.0, -2.0));
+        assert_eq!(intersections[0].location, primatives::point(0.0, 0.0, 2.0));
+        assert_eq!(intersections[1].location, primatives::point(0.0, 0.0, -2.0));
 
         let r = ray::new(primatives::point(0.0, 0.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
         let mut s = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
@@ -993,8 +993,8 @@ mod sphere_test {
 
         let intersections = s.intersect(r);
         assert_eq!(intersections.len(), 2);
-        assert_eq!(intersections[0], r.position(7.0));
-        assert_eq!(intersections[1], r.position(3.0));
+        assert_eq!(intersections[0].location, r.position(7.0));
+        assert_eq!(intersections[1].location, r.position(3.0));
 
         let r = ray::new(primatives::point(0.0, 0.0, -5.0), primatives::vec3(0.0, 0.0, 1.0));
         let mut s = shapes::sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
@@ -1174,7 +1174,7 @@ mod light_and_material {
 
         let light = light::new(color::new(1.0, 1.0, 1.0), primatives::point(-200.0, -400.0, 800.0));
         
-        //Because Camera work has not been properly implemented, the specular/diffuse
+        //Because camera work has not been properly implemented, the specular/diffuse
         //Highlights are acting funny
         let mut vantage_point = primatives::point(400.0, 400.0, 400.0);
         let trans = transformations::new_rotation_z_matrix((2.0 * transformations::PI)/3.0);
@@ -1190,7 +1190,7 @@ mod light_and_material {
                 let intersections = s.intersect(r);
 
                 if intersections.len() != 0 {
-                    let pnt = intersections[0];
+                    let pnt = intersections[0].location;
                     pnt.check_type(primatives::TYPE_PNT);
 
                     let normalv = s.normal_at(pnt);

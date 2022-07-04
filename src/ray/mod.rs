@@ -1,3 +1,5 @@
+pub mod intersection;
+
 use std::ops;
 
 use crate::primatives;
