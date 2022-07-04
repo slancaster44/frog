@@ -1167,16 +1167,19 @@ mod light_and_material {
     }
 
     #[test]
-    //#[ignore]
+    #[ignore]
     fn draw_sphere_shaded() {
         let mut s = shapes::sphere::new(300.0, primatives::point(350.0, 350.0, 0.0));
         s.material.color = color::new(1.0, 0.5, 1.0);
 
         let light = light::new(color::new(1.0, 1.0, 1.0), primatives::point(-200.0, -400.0, 800.0));
         
+        //Because Camera work has not been properly implemented, the specular/diffuse
+        //Highlights are acting funny
         let mut vantage_point = primatives::point(400.0, 400.0, 400.0);
-        let trans = transformations::new_rotation_y_matrix(transformations::PI);
-        vantage_point = trans * vantage_point;
+        let trans = transformations::new_rotation_z_matrix((2.0 * transformations::PI)/3.0);
+        let trans2 = transformations::new_rotation_x_matrix((1.4 * transformations::PI) / 3.0);
+        vantage_point = trans2 * trans * vantage_point;
 
         let mut this_canvas = canvas::new(700, 700);
         this_canvas.origin = (0, 0);
