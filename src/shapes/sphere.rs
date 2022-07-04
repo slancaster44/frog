@@ -4,9 +4,10 @@ use crate::primatives;
 use crate::ray;
 use crate::matrix;
 use crate::material;
-use crate::ray::intersection;
+use crate::shapes;
+use crate::shapes::intersection;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Sphere {
     pub radius: f64,
     pub origin: primatives::Tuple,
@@ -36,7 +37,7 @@ impl ops::Mul<Sphere> for matrix::Matrix4x4 {
     }
 }
 
-impl Sphere {
+impl shapes::Shape for Sphere {
 
     /* (x * x) + (y * y) + (z * z) = (radius * radius) is true for all 
      * points (x, y, z) on a sphere. You can reformulate this into
@@ -46,7 +47,7 @@ impl Sphere {
      * this function solves that quadratic to find the points on the ray
      * that intersect the sphere.
      */
-    pub fn intersect(&self, r_input: ray::Ray) -> Vec<intersection::Intersection<&Sphere>> {
+    fn intersect(&self, r_input: ray::Ray) -> Vec<intersection::Intersection> {
         let r = self.transformation.inverse() * r_input;
 
         let sphere_to_ray = r.origin - self.origin;
@@ -75,7 +76,7 @@ impl Sphere {
         return ret_val
     }
 
-    pub fn normal_at(&self, p: primatives::Tuple) -> primatives::Vec3T {
+    fn normal_at(&self, p: primatives::PointT) -> primatives::Vec3T {
         p.check_type(primatives::TYPE_PNT);
 
         //Remove transformations from input point

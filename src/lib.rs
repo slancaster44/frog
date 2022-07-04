@@ -928,6 +928,7 @@ mod ray_tests {
 mod sphere_test {
     use crate::primatives;
     use crate::shapes;
+    use crate::shapes::{Shape};
     use crate::ray;
     use crate::matrix::transformations;
     use crate::canvas;
@@ -1086,6 +1087,7 @@ mod light_and_material {
     use crate::material;
     use crate::shading;
     use crate::shapes;
+    use crate::shapes::{Shape};
     use crate::ray;
     use crate::matrix::transformations;
     use crate::canvas;

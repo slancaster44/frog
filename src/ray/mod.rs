@@ -1,4 +1,3 @@
-pub mod intersection;
 
 use std::ops;
 
