@@ -22,7 +22,7 @@ pub fn new(c: color::Color, a: f64, d: f64, sp: f64, sh: f64) -> Material {
 pub fn new_default() -> Material {
     return Material {
         color: color::new(1.0, 1.0, 1.0),
-        ambient: 0.1,
+        ambient: 0.4,
         diffuse: 0.9,
         specular: 0.9,
         shininess:  200.0

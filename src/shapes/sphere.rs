@@ -92,4 +92,8 @@ impl shapes::Shape for Sphere {
 
         return world_normal.normalized()
     }
+
+    fn get_material(&self) -> material::Material {
+        return self.material;
+    }
 }

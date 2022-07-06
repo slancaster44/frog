@@ -2,6 +2,7 @@ use crate::primatives;
 use crate::ray;
 use crate::shapes::{Shape};
 
+#[derive(Copy, Clone)]
 pub struct Intersection<'a> {
     pub time: f64,
     pub location: primatives::PointT,

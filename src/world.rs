@@ -4,6 +4,7 @@ use crate::light;
 use crate::color;
 use crate::primatives;
 use crate::ray;
+use crate::shading;
 
 pub struct World<'a> {
     pub objects: Vec<&'a (dyn Shape + 'a)>,
@@ -27,5 +28,14 @@ impl World<'_> {
 
         ret_val.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap());
         return ret_val
+    }
+
+    pub fn color_at_ray<'a>(&'a self, r: ray::Ray) -> color::Color {
+        let intersections = self.intersect(r);
+        if intersections.len() == 0 {
+            return color::new(0.0, 0.0, 0.0)
+        } 
+            
+        return shading::shade_intersection(intersections[0], self.light)
     }
 }

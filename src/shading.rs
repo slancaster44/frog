@@ -2,6 +2,7 @@ use crate::material;
 use crate::light;
 use crate::primatives;
 use crate::color;
+use crate::shapes::intersection;
 
 /* The Phong reflection model colors and object by adding together the
  * ambient room lighting, diffused light, and a specular highlight 
@@ -52,3 +53,7 @@ eyev: primatives::Vec3T, normalv: primatives::Vec3T) -> color::Color {
 
         return ambient_color + diffuse + specular;
 } 
+
+pub fn shade_intersection(i: intersection::Intersection, l: light::Light) -> color::Color {
+    return shade(i.shape.get_material(), l, i.location, i.eyev, i.normalv);
+}
