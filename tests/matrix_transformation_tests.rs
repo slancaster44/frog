@@ -4,6 +4,7 @@ use frog::matrix::transformations;
 use frog::primatives;
 use frog::canvas;
 use frog::color;
+use frog::matrix;
 
 #[test]
 fn translation() {
@@ -154,7 +155,46 @@ fn clock_face() {
     can.write_to_ppm("clockface.ppm");
 }
 
+#[test]
+fn view_tranform() {
+    let el = primatives::point(0.0, 0.0, 0.0);
+    let pv = primatives::point(0.0, 0.0, -1.0);
+    let up = primatives::vec3(0.0, 1.0, 0.0);
 
+    let t = transformations::new_view_transformation_matrix(el, pv, up);
+    assert_eq!(matrix::IDENTITY_MATRIX_4X4, t);
+
+    let el = primatives::point(0.0, 0.0, 0.0);
+    let pv = primatives::point(0.0, 0.0, 1.0);
+    let up = primatives::vec3(0.0, 1.0, 0.0);
+
+    let t = transformations::new_view_transformation_matrix(el, pv, up);
+    let expected = transformations::new_scaling_matrix(-1.0, 1.0, -1.0);
+    assert_eq!(expected, t);
+
+    let el = primatives::point(0.0, 0.0, 8.0);
+    let pv = primatives::point(0.0, 0.0, 0.0);
+    let up = primatives::vec3(0.0, 1.0, 0.0);
+
+    let t = transformations::new_view_transformation_matrix(el, pv, up);
+    let expected = transformations::new_translation_matrix(0.0, 0.0, -8.0);
+    assert_eq!(expected, t);
+
+    let el = primatives::point(1.0, 3.0, 2.0);
+    let pv = primatives::point(4.0, -2.0, 8.0);
+    let up = primatives::vec3(1.0, 1.0, 0.0);
+
+    let t = transformations::new_view_transformation_matrix(el, pv, up);
+    let expected = matrix::Matrix4x4 {
+        contents: [
+            [-0.50709, 0.50709, 0.67612, -2.36643],
+            [0.76772, 0.60609, 0.12122, -2.82843],
+            [-0.35857, 0.59761, -0.71714, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+        ]
+    };
+    assert_eq!(expected, t);
+}
 
 
 

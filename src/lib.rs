@@ -9,3 +9,4 @@ pub mod light;
 pub mod material;
 pub mod shading;
 pub mod world;
+pub mod camera;

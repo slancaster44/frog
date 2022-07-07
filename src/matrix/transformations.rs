@@ -1,4 +1,5 @@
 use crate::matrix;
+use crate::primatives;
 
 pub const PI: f64 = std::f64::consts::PI;
 
@@ -66,4 +67,32 @@ pub fn new_shearing_matrix(xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64)
             [0.0, 0.0, 0.0, 1.0]
         ]
     }
+}
+
+pub fn new_view_transformation_matrix(
+    eye_loc: primatives::PointT,
+    point_viewed: primatives::PointT,
+    up: primatives::Vec3T
+) -> matrix::Matrix4x4 {
+    eye_loc.check_type(primatives::TYPE_PNT);
+    point_viewed.check_type(primatives::TYPE_PNT);
+    up.check_type(primatives::TYPE_VEC);
+
+    let up = up.normalized();
+
+    let forwardv = (point_viewed - eye_loc).normalized();
+    let leftv = primatives::cross_product(forwardv, up);
+
+    let up = primatives::cross_product(leftv, forwardv);
+
+    let m = matrix::Matrix4x4{
+        contents: [
+            [leftv.x, leftv.y, leftv.z, 0.0],
+            [up.x, up.y, up.z, 0.0],
+            [-forwardv.x, -forwardv.y, -forwardv.z, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+        ]
+    };
+
+    return m * new_translation_matrix(-eye_loc.x, -eye_loc.y, -eye_loc.z);
 }
