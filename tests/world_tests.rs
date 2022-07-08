@@ -10,10 +10,12 @@ use frog::ray;
 use frog::shading;
 use frog::light;
 use frog::canvas;
+use frog::camera;
 
 #[test]
 fn world_creation() {
-    let mut w = world::new();
+    let c = camera::new(0, 0, 0.0);
+    let mut w = world::new(c);
     
     let mut s1 = sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
     s1.material.color = color::new(0.8, 1.0, 0.6);
@@ -47,7 +49,8 @@ fn world_creation() {
 
 #[test]
 fn shade_intersection() {
-    let mut w = world::new();
+    let c = camera::new(0, 0, 0.0);
+    let mut w = world::new(c);
     
     let mut s1 = sphere::new(1.0, primatives::point(0.0, 0.0, 0.0));
     s1.material.color = color::new(0.8, 1.0, 0.6);
@@ -85,8 +88,10 @@ fn shade_intersection() {
 }
 
 #[test]
+#[ignore]
 fn draw_world() {
-    let mut w = world::new();
+    let c = camera::new(0, 0, 0.0);
+    let mut w = world::new(c);
 
     let mut s1 = sphere::new(400.0, primatives::point(0.0, 0.0, 0.0));
     s1.material.color = color::new(0.5, 0.2, 0.7);
